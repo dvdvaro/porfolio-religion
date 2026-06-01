@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Gran Viaje de Pablo — Bloque III · CEIP Santuario Córdoba</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0C0E1A;
+    --surface: #141726;
+    --border: rgba(183,160,255,0.12);
+    --purple: #6B5CE7;
+    --purple-light: #B7A0FF;
+    --purple-faint: rgba(107,92,231,0.1);
+    --cream: #EDE9FF;
+    --muted: rgba(237,233,255,0.45);
+    --gold: #F0C040;
+    --gold-faint: rgba(240,192,64,0.08);
+    --v1: #2563A8;
+    --v1-light: #90C0F0;
+    --v1-faint: rgba(37,99,168,0.15);
+    --v2: #1A7A5E;
+    --v2-light: #7FD4B8;
+    --v2-faint: rgba(26,122,94,0.15);
+    --v3: #A03520;
+    --v3-light: #F0A090;
+    --v3-faint: rgba(160,53,32,0.15);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Crimson Pro',serif;background:var(--bg);color:var(--cream);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+  .slides-wrapper{flex:1;position:relative;overflow:hidden;}
+  .slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem 2rem;opacity:0;transform:translateX(40px);transition:opacity 0.4s,transform 0.4s;pointer-events:none;}
+  .slide.active{opacity:1;transform:translateX(0);pointer-events:all;}
+  .slide.exit{opacity:0;transform:translateX(-40px);}
+
+  .nav-bar{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.5rem;background:rgba(12,14,26,0.98);border-top:1px solid var(--border);}
+  .nav-btn{font-family:'Cinzel',serif;font-size:11px;font-weight:700;padding:8px 20px;border-radius:2px;border:1px solid var(--purple);background:transparent;color:var(--purple-light);cursor:pointer;letter-spacing:0.1em;text-transform:uppercase;transition:background 0.2s,color 0.2s;}
+  .nav-btn:hover{background:var(--purple);color:var(--cream);}
+  .nav-btn:disabled{opacity:0.2;cursor:default;}
+  .nav-btn:disabled:hover{background:transparent;color:var(--purple-light);}
+  .dots{display:flex;gap:6px;}
+  .dot{width:6px;height:6px;border-radius:50%;background:rgba(183,160,255,0.2);transition:background 0.3s;}
+  .dot.active{background:var(--purple);}
+  .dot.done{background:rgba(183,160,255,0.4);}
+  .counter{font-family:'Cinzel',serif;font-size:10px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;}
+
+  .tag{font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.75rem;}
+  .title{font-family:'Cinzel',serif;font-size:clamp(1.6rem,3.5vw,2.6rem);font-weight:900;text-align:center;line-height:1.15;margin-bottom:0.5rem;}
+  .gold-line{width:48px;height:1px;background:var(--gold);margin:0.75rem auto 1.25rem;}
+
+  /* COVER */
+  .cover-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(107,92,231,0.08),transparent 60%),radial-gradient(ellipse at 80% 30%,rgba(240,192,64,0.05),transparent 60%);}
+  .cover-content{position:relative;z-index:1;text-align:center;max-width:700px;}
+  .route-display{display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap;margin:1.5rem 0;font-size:13px;color:var(--muted);}
+  .route-city{padding:4px 10px;border:1px solid var(--border);border-radius:2px;color:var(--cream);font-size:12px;}
+  .route-arrow{color:var(--gold);font-size:12px;}
+  .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:1rem;}
+  .chip{font-size:11px;padding:4px 12px;border:1px solid var(--border);border-radius:20px;color:var(--muted);}
+
+  /* VIAJE SLIDE */
+  .viaje-layout{display:grid;grid-template-columns:1fr 1.6fr;gap:1.25rem;max-width:860px;width:100%;}
+  .viaje-card{border-radius:6px;padding:1.25rem;}
+  .viaje-num{font-family:'Cinzel',serif;font-size:3.5rem;font-weight:900;line-height:1;margin-bottom:0.5rem;opacity:0.15;}
+  .viaje-title{font-family:'Cinzel',serif;font-size:1.1rem;font-weight:700;margin-bottom:0.25rem;}
+  .viaje-years{font-size:12px;margin-bottom:0.75rem;}
+  .viaje-route{font-size:13px;line-height:1.6;border-top:1px solid;padding-top:0.75rem;margin-top:0.75rem;}
+  .viaje-route-label{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;}
+
+  .viaje-detail{border-radius:6px;padding:1.25rem;background:var(--surface);border:1px solid var(--border);display:flex;flex-direction:column;gap:0.75rem;}
+  .detail-section{border-radius:4px;padding:0.75rem 1rem;}
+  .detail-label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;}
+  .detail-text{font-size:14px;line-height:1.65;}
+  .cita-inline{font-style:italic;font-size:14px;line-height:1.6;padding:0.75rem 1rem;border-left:2px solid var(--gold);background:var(--gold-faint);border-radius:0 4px 4px 0;color:rgba(237,233,255,0.8);}
+  .pregunta-box{background:var(--purple-faint);border:1px solid rgba(183,160,255,0.2);border-radius:4px;padding:0.75rem 1rem;}
+  .pregunta-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--purple-light);margin-bottom:4px;}
+  .pregunta-text{font-size:14px;line-height:1.6;color:var(--cream);}
+
+  /* CARTAS SLIDE */
+  .cartas-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;max-width:800px;width:100%;}
+  .carta-card{border-radius:6px;padding:1rem 1.125rem;border:1px solid;}
+  .carta-nombre{font-family:'Cinzel',serif;font-size:0.85rem;font-weight:700;margin-bottom:4px;}
+  .carta-ciudad{font-size:11px;margin-bottom:8px;}
+  .carta-problema{font-size:13px;line-height:1.5;margin-bottom:8px;}
+  .carta-cita{font-size:12px;font-style:italic;opacity:0.75;border-top:1px solid;padding-top:8px;margin-top:4px;}
+  .carta-actual{font-size:12px;padding:6px 8px;border-radius:3px;margin-top:6px;line-height:1.5;}
+
+  /* CONVERSION SLIDE */
+  .conv-layout{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;max-width:760px;width:100%;}
+  .conv-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1.25rem;}
+  .conv-icon{font-size:2rem;margin-bottom:0.5rem;}
+  .conv-title{font-family:'Cinzel',serif;font-size:0.9rem;font-weight:700;margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.05em;}
+  .conv-text{font-size:14px;line-height:1.65;color:rgba(237,233,255,0.75);}
+  .conv-arrow{display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--gold);}
+
+  /* QUIZ SLIDE */
+  .quiz-box{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1.5rem;max-width:700px;width:100%;}
+  .quiz-q{font-size:1.1rem;line-height:1.6;color:var(--cream);margin-bottom:1rem;font-style:italic;}
+  .quiz-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .opt-btn{font-family:'Crimson Pro',serif;font-size:14px;padding:10px 14px;border-radius:3px;border:1px solid var(--border);background:rgba(237,233,255,0.03);color:var(--cream);cursor:pointer;text-align:left;line-height:1.4;transition:background 0.15s,border-color 0.15s;}
+  .opt-btn:hover:not(:disabled){background:var(--purple-faint);border-color:var(--purple);}
+  .opt-btn.correct{background:rgba(26,122,94,0.2);border-color:var(--v2);color:var(--v2-light);}
+  .opt-btn.wrong{background:rgba(160,53,32,0.15);border-color:var(--v3);opacity:0.5;}
+  .opt-btn:disabled{cursor:default;}
+  .feedback{margin-top:0.75rem;padding:0.75rem 1rem;border-radius:3px;font-size:14px;line-height:1.6;border-left:3px solid;display:none;}
+  .feedback.show{display:block;}
+  .fb-ok{background:rgba(26,122,94,0.1);border-color:var(--v2);}
+  .fb-no{background:rgba(160,53,32,0.1);border-color:var(--v3);}
+
+  /* FINAL */
+  .final-content{text-align:center;max-width:640px;}
+  .final-cita{font-size:1.2rem;font-style:italic;line-height:1.7;color:rgba(237,233,255,0.85);padding:1.5rem;border:1px solid rgba(240,192,64,0.3);border-radius:6px;background:var(--gold-faint);margin:1.5rem 0;}
+  .final-ref{font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.1em;color:var(--muted);font-style:normal;margin-top:0.5rem;}
+</style>
+</head>
+<body>
+
+<div class="slides-wrapper">
+
+  <!-- 0: COVER -->
+  <div class="slide active" id="slide-0">
+    <div class="cover-bg"></div>
+    <div class="cover-content">
+      <span class="tag" style="color:var(--purple-light);">Bloque III · San Pablo · CEIP Santuario Córdoba</span>
+      <h1 class="title">El Gran Viaje<br>de Pablo</h1>
+      <div class="gold-line"></div>
+      <p style="font-size:1.05rem;color:var(--muted);line-height:1.7;max-width:500px;margin:0 auto 1rem;">De perseguidor de cristianos a mayor evangelizador de la historia. Tres viajes. Miles de kilómetros. Un único mensaje.</p>
+      <div class="route-display">
+        <span class="route-city">Antioquía</span><span class="route-arrow">→</span>
+        <span class="route-city">Grecia</span><span class="route-arrow">→</span>
+        <span class="route-city">Éfeso</span><span class="route-arrow">→</span>
+        <span class="route-city">Roma</span>
+      </div>
+      <div class="chips">
+        <span class="chip">3 viajes apostólicos</span>
+        <span class="chip">4 cartas paulinas</span>
+        <span class="chip">3.º–4.º Primaria</span>
+        <span class="chip">ABJ</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1: CONVERSIÓN EN DAMASCO -->
+  <div class="slide" id="slide-1">
+    <span class="tag" style="color:var(--gold);">El punto de partida</span>
+    <h2 class="title" style="font-size:1.8rem;">La conversión en el camino a Damasco</h2>
+    <div class="gold-line"></div>
+    <div class="conv-layout">
+      <div class="conv-card">
+        <div class="conv-icon">⚔️</div>
+        <div class="conv-title">Saulo — antes</div>
+        <div class="conv-text">Fariseo celoso. Perseguía a los cristianos y los metía en la cárcel. Convencido de que actuaba en nombre de Dios. Estuvo presente en la muerte del primer mártir, Esteban.</div>
+      </div>
+      <div class="conv-arrow">→</div>
+      <div class="conv-card" style="border-color:rgba(183,160,255,0.3);">
+        <div class="conv-icon">✨</div>
+        <div class="conv-title">Pablo — después</div>
+        <div class="conv-text">Una luz lo derriba en el camino a Damasco. Escucha: <em>«Saulo, Saulo, ¿por qué me persigues?»</em> (Hch 9:4). Queda ciego tres días. Al recuperar la vista, su vida cambia para siempre.</div>
+      </div>
+    </div>
+    <div class="cita-inline" style="max-width:700px;margin-top:1rem;">
+      «Ya no vivo yo, sino que es Cristo quien vive en mí.» — Gal 2:20 (Biblia CEE)
+    </div>
+  </div>
+
+  <!-- 2: PRIMER VIAJE -->
+  <div class="slide" id="slide-2">
+    <div class="viaje-layout">
+      <div class="viaje-card" style="background:var(--v1-faint);border:1px solid rgba(37,99,168,0.3);">
+        <div class="viaje-num" style="color:var(--v1-light);">I</div>
+        <div class="viaje-title" style="color:var(--v1-light);">Primer viaje</div>
+        <div class="viaje-years" style="color:rgba(144,192,240,0.6);">Hacia el año 46–48 d.C.</div>
+        <div class="viaje-route" style="border-color:rgba(37,99,168,0.3);color:rgba(237,233,255,0.7);">
+          <div class="viaje-route-label" style="color:var(--v1-light);">Ruta</div>
+          Antioquía → Chipre → Iconio → Listra → Derbe → regreso a Antioquía
+        </div>
+      </div>
+      <div class="viaje-detail">
+        <div class="detail-section" style="background:var(--v1-faint);">
+          <div class="detail-label" style="color:var(--v1-light);">Misión</div>
+          <div class="detail-text">Pablo y Bernabé son enviados por la comunidad de Antioquía. Es el <strong>primer gran salto misionero</strong> del cristianismo fuera de Palestina. Por primera vez, el mensaje de Jesús llega a pueblos no judíos.</div>
+        </div>
+        <div class="detail-section" style="background:rgba(237,233,255,0.03);border:1px solid var(--border);">
+          <div class="detail-label" style="color:var(--muted);">Dato clave</div>
+          <div class="detail-text" style="color:var(--muted);">En Antioquía fue la primera vez que llamaron <strong style="color:var(--cream);">«cristianos»</strong> a los seguidores de Jesús (Hch 11:26). Necesitaban un nombre propio porque ya eran reconocibles como grupo diferente.</div>
+        </div>
+        <div class="pregunta-box">
+          <div class="pregunta-label">Pregunta para el aula</div>
+          <div class="pregunta-text">¿Por qué crees que los seguidores de Jesús necesitaban un nombre propio? ¿Qué dice eso de cómo era su vida en común?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3: SEGUNDO VIAJE -->
+  <div class="slide" id="slide-3">
+    <div class="viaje-layout">
+      <div class="viaje-card" style="background:var(--v2-faint);border:1px solid rgba(26,122,94,0.3);">
+        <div class="viaje-num" style="color:var(--v2-light);">II</div>
+        <div class="viaje-title" style="color:var(--v2-light);">Segundo viaje</div>
+        <div class="viaje-years" style="color:rgba(127,212,184,0.6);">Hacia el año 49–52 d.C.</div>
+        <div class="viaje-route" style="border-color:rgba(26,122,94,0.3);color:rgba(237,233,255,0.7);">
+          <div class="viaje-route-label" style="color:var(--v2-light);">Ruta</div>
+          Antioquía → Filipos → Tesalónica → Atenas → Corinto → regreso a Antioquía
+        </div>
+      </div>
+      <div class="viaje-detail">
+        <div class="detail-section" style="background:var(--v2-faint);">
+          <div class="detail-label" style="color:var(--v2-light);">Misión</div>
+          <div class="detail-text">Pablo lleva el Evangelio a <strong>Europa por primera vez</strong>. Funda comunidades en Grecia: Filipos, Tesalónica y Corinto. Es el viaje más largo e importante de su vida misionera.</div>
+        </div>
+        <div class="detail-section" style="background:rgba(237,233,255,0.03);border:1px solid var(--border);">
+          <div class="detail-label" style="color:var(--muted);">Dato clave</div>
+          <div class="detail-text" style="color:var(--muted);">Escribe las <strong style="color:var(--cream);">cartas a los Tesalonicenses</strong> — las más antiguas del Nuevo Testamento (hacia el año 50 d.C.). Córdoba era en ese momento una de las ciudades más romanas de la Península — el mismo mundo cultural que Pablo recorrió.</div>
+        </div>
+        <div class="pregunta-box">
+          <div class="pregunta-label">Pregunta para el aula</div>
+          <div class="pregunta-text">Pablo llegó a Filipos y lo encarcelaron. Desde la cárcel cantaba himnos. ¿Cómo es posible tener alegría en una situación muy difícil?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4: TERCER VIAJE -->
+  <div class="slide" id="slide-4">
+    <div class="viaje-layout">
+      <div class="viaje-card" style="background:var(--v3-faint);border:1px solid rgba(160,53,32,0.3);">
+        <div class="viaje-num" style="color:var(--v3-light);">III</div>
+        <div class="viaje-title" style="color:var(--v3-light);">Tercer viaje</div>
+        <div class="viaje-years" style="color:rgba(240,160,144,0.6);">Hacia el año 53–58 d.C.</div>
+        <div class="viaje-route" style="border-color:rgba(160,53,32,0.3);color:rgba(237,233,255,0.7);">
+          <div class="viaje-route-label" style="color:var(--v3-light);">Ruta</div>
+          Antioquía → Éfeso (3 años) → Macedonia → Corinto → Jerusalén → Roma
+        </div>
+      </div>
+      <div class="viaje-detail">
+        <div class="detail-section" style="background:var(--v3-faint);">
+          <div class="detail-label" style="color:var(--v3-light);">Misión</div>
+          <div class="detail-text">Pablo pasa <strong>3 años en Éfeso</strong>, la ciudad más importante de Asia Menor. Acaba en Roma — capital del Imperio — como prisionero. Desde la cárcel escribe sus cartas más profundas.</div>
+        </div>
+        <div class="detail-section" style="background:rgba(237,233,255,0.03);border:1px solid var(--border);">
+          <div class="detail-label" style="color:var(--muted);">Dato clave</div>
+          <div class="detail-text" style="color:var(--muted);">Pablo soñaba con llegar a Roma. Llegó <strong style="color:var(--cream);">encadenado</strong>. No como héroe, sino como prisionero. Y desde ahí cambió el mundo. La carta a los Romanos es su obra teológica más importante.</div>
+        </div>
+        <div class="pregunta-box">
+          <div class="pregunta-label">Pregunta para el aula</div>
+          <div class="pregunta-text">Pablo consiguió su sueño (llegar a Roma) pero no como esperaba (encadenado). ¿Qué dice eso de cómo entendía él el éxito?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5: LAS CARTAS -->
+  <div class="slide" id="slide-5">
+    <span class="tag" style="color:var(--purple-light);">Las cartas de Pablo — problemas de ayer y de hoy</span>
+    <h2 class="title" style="font-size:1.6rem;">Nada ha cambiado tanto</h2>
+    <div class="gold-line"></div>
+    <div class="cartas-grid">
+      <div class="carta-card" style="background:rgba(37,99,168,0.1);border-color:rgba(37,99,168,0.3);">
+        <div class="carta-nombre" style="color:var(--v1-light);">1 Corintios</div>
+        <div class="carta-ciudad" style="color:rgba(144,192,240,0.6);">→ Comunidad de Corinto</div>
+        <div class="carta-problema">La comunidad está dividida en bandos: unos siguen a Pablo, otros a Apolo. Nadie habla con nadie.</div>
+        <div class="carta-cita" style="border-color:rgba(37,99,168,0.3);color:rgba(144,192,240,0.8);">«¿Acaso está dividido Cristo?» — 1 Cor 1:13 (CEE)</div>
+        <div class="carta-actual" style="background:rgba(37,99,168,0.08);color:rgba(237,233,255,0.7);">Como cuando en clase hay grupos y nadie se habla.</div>
+      </div>
+      <div class="carta-card" style="background:rgba(26,122,94,0.1);border-color:rgba(26,122,94,0.3);">
+        <div class="carta-nombre" style="color:var(--v2-light);">Filipenses</div>
+        <div class="carta-ciudad" style="color:rgba(127,212,184,0.6);">→ Comunidad de Filipos</div>
+        <div class="carta-problema">Dos mujeres de la comunidad, Evodia y Síntique, están enfrentadas. Pablo les pide reconciliación desde la cárcel.</div>
+        <div class="carta-cita" style="border-color:rgba(26,122,94,0.3);color:rgba(127,212,184,0.8);">«Os ruego que os pongáis de acuerdo.» — Flp 4:2 (CEE)</div>
+        <div class="carta-actual" style="background:rgba(26,122,94,0.08);color:rgba(237,233,255,0.7);">Como cuando dos amigos están peleados y alguien tiene que dar el primer paso.</div>
+      </div>
+      <div class="carta-card" style="background:rgba(160,53,32,0.1);border-color:rgba(160,53,32,0.3);">
+        <div class="carta-nombre" style="color:var(--v3-light);">Gálatas</div>
+        <div class="carta-ciudad" style="color:rgba(240,160,144,0.6);">→ Comunidad de Galacia</div>
+        <div class="carta-problema">Algunos quieren volver a las normas antiguas por miedo a la libertad del Evangelio.</div>
+        <div class="carta-cita" style="border-color:rgba(160,53,32,0.3);color:rgba(240,160,144,0.8);">«Para ser libres nos liberó Cristo.» — Gal 5:1 (CEE)</div>
+        <div class="carta-actual" style="background:rgba(160,53,32,0.08);color:rgba(237,233,255,0.7);">Como cuando preferimos lo de siempre aunque sepamos que hay algo mejor.</div>
+      </div>
+      <div class="carta-card" style="background:var(--purple-faint);border-color:rgba(107,92,231,0.3);">
+        <div class="carta-nombre" style="color:var(--purple-light);">Romanos</div>
+        <div class="carta-ciudad" style="color:rgba(183,160,255,0.6);">→ Comunidad de Roma</div>
+        <div class="carta-problema">Pablo no los conoce aún pero les escribe sobre el amor de Dios que nunca abandona a nadie.</div>
+        <div class="carta-cita" style="border-color:rgba(107,92,231,0.3);color:rgba(183,160,255,0.8);">«Nada podrá separarnos del amor de Dios.» — Rom 8:39 (CEE)</div>
+        <div class="carta-actual" style="background:rgba(107,92,231,0.05);color:rgba(237,233,255,0.7);">Como cuando alguien siente que nadie le quiere o que Dios se ha olvidado de él.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6: QUIZ -->
+  <div class="slide" id="slide-6">
+    <span class="tag" style="color:var(--gold);">¿Lo has entendido?</span>
+    <h2 class="title" style="font-size:1.6rem;">Pon a prueba lo aprendido</h2>
+    <div class="gold-line"></div>
+    <div class="quiz-box">
+      <p class="quiz-q">Pablo llegó a Roma encadenado, no como héroe. Sin embargo, cambió el mundo desde allí. ¿Qué nos enseña eso sobre la manera en que Dios actúa en la historia?</p>
+      <div class="quiz-opts">
+        <button class="opt-btn" onclick="answer(this,false)">Que hay que tener éxito y poder para hacer cosas importantes</button>
+        <button class="opt-btn" onclick="answer(this,true)">Que Dios puede actuar desde la debilidad y la adversidad, no solo desde el poder</button>
+        <button class="opt-btn" onclick="answer(this,false)">Que Pablo se equivocó yendo a Roma</button>
+        <button class="opt-btn" onclick="answer(this,false)">Que ser cristiano garantiza el éxito y el reconocimiento social</button>
+      </div>
+      <div class="feedback fb-ok" id="fb-ok">✓ <strong>Correcto.</strong> Pablo escribe desde la cárcel las cartas más alegres y profundas del Nuevo Testamento. La fuerza no venía de su situación, sino de aquello en lo que creía: «Todo lo puedo en Aquel que me conforta» (Flp 4:13, Biblia CEE).</div>
+      <div class="feedback fb-no" id="fb-no">✗ Piensa en el contraste: gran misión, situación difícil. ¿Quién tiene el control realmente?</div>
+    </div>
+  </div>
+
+  <!-- 7: FINAL -->
+  <div class="slide" id="slide-7">
+    <div class="final-content">
+      <span class="tag" style="color:var(--gold);">El mensaje que no cambia</span>
+      <h2 class="title" style="font-size:1.8rem;">Pablo hoy</h2>
+      <div class="gold-line"></div>
+      <p style="font-size:1rem;color:var(--muted);line-height:1.7;margin-bottom:0.5rem;">¿Crees que Pablo escribiría hoy mensajes de WhatsApp o correos electrónicos a su comunidad? ¿En qué cambiaría y en qué no cambiaría su mensaje?</p>
+      <div class="final-cita">
+        «Nada podrá separarnos del amor de Dios manifestado en Cristo Jesús, Señor nuestro.»
+        <div class="final-ref">Romanos 8:39 · Biblia de la Conferencia Episcopal Española</div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;">Conexión con Córdoba: el obispo <strong style="color:var(--cream);">Osio de Córdoba</strong> actuó en el siglo IV con el mismo espíritu de Pablo — llevando el mensaje cristiano al centro del poder político, al Concilio de Nicea. El mismo Dios, el mismo valor.</p>
+      <div class="chips" style="margin-top:1rem;">
+        <span class="chip">🎯 Bloque III completado</span>
+        <span class="chip">📚 Temas 9–12</span>
+        <span class="chip">🏫 CEIP Santuario · Córdoba</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end slides -->
+
+<div class="nav-bar">
+  <button class="nav-btn" id="btn-prev" onclick="prev()" disabled>← Anterior</button>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+    <div class="dots" id="dots"></div>
+    <span class="counter" id="counter">1 / 8</span>
+  </div>
+  <button class="nav-btn" id="btn-next" onclick="next()">Siguiente →</button>
+</div>
+
+<script>
+  const total=8;let cur=0;let answered=false;
+  const dotsEl=document.getElementById('dots');
+  for(let i=0;i<total;i++){const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.id='dot-'+i;dotsEl.appendChild(d);}
+  function goTo(n){
+    const p=document.getElementById('slide-'+cur);p.classList.remove('active');p.classList.add('exit');
+    setTimeout(()=>p.classList.remove('exit'),400);
+    document.getElementById('dot-'+cur).classList.remove('active');
+    if(cur<n)document.getElementById('dot-'+cur).classList.add('done');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    document.getElementById('dot-'+cur).classList.add('active');
+    document.getElementById('counter').textContent=(cur+1)+' / '+total;
+    document.getElementById('btn-prev').disabled=cur===0;
+    document.getElementById('btn-next').disabled=cur===total-1;
+  }
+  function next(){if(cur<total-1)goTo(cur+1);}
+  function prev(){if(cur>0)goTo(cur-1);}
+  function answer(btn,correct){
+    if(answered)return;answered=true;
+    document.querySelectorAll('.opt-btn').forEach(b=>{b.disabled=true;if(b===btn)b.classList.add(correct?'correct':'wrong');});
+    if(correct)document.getElementById('fb-ok').classList.add('show');
+    else{document.getElementById('fb-no').classList.add('show');setTimeout(()=>{answered=false;document.querySelectorAll('.opt-btn').forEach(b=>{b.disabled=false;b.classList.remove('wrong');});document.getElementById('fb-no').classList.remove('show');},2000);}
+  }
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')prev();});
+</script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¿Huyes o Confías? — Bloque II · CEIP Santuario Córdoba</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F1F1A;
+    --surface: #162820;
+    --border: rgba(157,225,203,0.15);
+    --teal: #1D9E75;
+    --teal-light: #9FE1CB;
+    --teal-faint: rgba(29,158,117,0.1);
+    --cream: #F0EDE5;
+    --muted: rgba(240,237,229,0.5);
+    --gold: #D4A843;
+    --coral: #E05A3A;
+    --coral-faint: rgba(224,90,58,0.1);
+    --purple: #7C6FCD;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--cream);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .slides-wrapper { flex: 1; position: relative; overflow: hidden; }
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 1.5rem 2rem;
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; transform: translateY(0); pointer-events: all; }
+  .slide.exit { opacity: 0; transform: translateY(-30px); }
+
+  .nav-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: rgba(15,31,26,0.98);
+    border-top: 1px solid var(--border);
+  }
+  .nav-btn {
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    padding: 8px 20px; border-radius: 4px;
+    border: 1px solid var(--teal); background: transparent;
+    color: var(--teal); cursor: pointer;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-btn:hover { background: var(--teal); color: var(--bg); }
+  .nav-btn:disabled { opacity: 0.2; cursor: default; }
+  .nav-btn:disabled:hover { background: transparent; color: var(--teal); }
+  .dots { display: flex; gap: 6px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(157,225,203,0.2); transition: background 0.3s; }
+  .dot.active { background: var(--teal); }
+  .dot.done { background: rgba(157,225,203,0.5); }
+  .counter { font-size: 12px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .slide-tag { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal-light); margin-bottom: 0.75rem; }
+  .slide-title { font-family: 'Lora', serif; font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 700; text-align: center; line-height: 1.15; margin-bottom: 0.75rem; }
+  .teal-line { width: 40px; height: 2px; background: var(--teal); margin: 0.75rem auto 1.25rem; }
+
+  /* COVER */
+  .cover-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin: 1.5rem 0; width: 100%; max-width: 640px; }
+  .cover-persona {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.75rem 0.5rem; text-align: center;
+    transition: border-color 0.2s;
+  }
+  .cover-persona:hover { border-color: var(--teal); }
+  .cover-persona-icon { font-size: 1.6rem; margin-bottom: 4px; }
+  .cover-persona-name { font-size: 11px; font-weight: 600; color: var(--teal-light); text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* PERSONA CARD */
+  .persona-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 1.25rem; max-width: 820px; width: 100%; }
+  .persona-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.25rem; text-align: center;
+  }
+  .persona-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+  .persona-name { font-family: 'Lora', serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .persona-ref { font-size: 12px; color: var(--muted); font-style: italic; }
+  .persona-bio { font-size: 13px; color: var(--muted); line-height: 1.6; margin-top: 0.75rem; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+
+  .decision-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+  .decision-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--teal-light); margin-bottom: 0.75rem; }
+  .decision-question { font-size: 1rem; line-height: 1.6; color: var(--cream); margin-bottom: 1rem; font-family: 'Lora', serif; font-style: italic; }
+  .decision-opts { display: flex; flex-direction: column; gap: 6px; }
+  .opt-btn {
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    padding: 10px 14px; border-radius: 4px;
+    border: 1px solid var(--border); background: rgba(240,237,229,0.03);
+    color: var(--cream); cursor: pointer; text-align: left; line-height: 1.4;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .opt-btn:hover:not(:disabled) { background: var(--teal-faint); border-color: var(--teal); }
+  .opt-btn.correct { background: rgba(29,158,117,0.2); border-color: var(--teal); color: var(--teal-light); }
+  .opt-btn.wrong { background: var(--coral-faint); border-color: var(--coral); opacity: 0.5; }
+  .opt-btn:disabled { cursor: default; }
+
+  .feedback { margin-top: 0.75rem; padding: 0.75rem 1rem; border-radius: 4px; font-size: 13px; line-height: 1.6; border-left: 3px solid; display: none; }
+  .feedback.show { display: block; }
+  .fb-ok { background: rgba(29,158,117,0.1); border-color: var(--teal); }
+  .fb-no { background: var(--coral-faint); border-color: var(--coral); }
+
+  .cita-block {
+    margin-top: 0.75rem; padding: 0.75rem 1rem;
+    border-left: 2px solid var(--teal);
+    background: var(--teal-faint);
+    border-radius: 0 4px 4px 0;
+    font-size: 13px; font-style: italic; color: var(--muted);
+    display: none;
+  }
+  .cita-block.show { display: block; }
+
+  /* RESULT TABLE */
+  .result-table { width: 100%; max-width: 800px; border-collapse: separate; border-spacing: 0 6px; }
+  .result-table th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 0 1rem 0.5rem; text-align: left; }
+  .result-table td { background: var(--surface); padding: 10px 1rem; font-size: 13px; }
+  .result-table td:first-child { border-radius: 4px 0 0 4px; font-weight: 500; }
+  .result-table td:last-child { border-radius: 0 4px 4px 0; color: var(--muted); }
+  .enriched { color: var(--teal-light); }
+  .impoverished { color: #F5A89A; }
+
+  /* QUESTION FINAL */
+  .q-card { background: var(--surface); border: 1px solid rgba(212,168,67,0.3); border-radius: 8px; padding: 1.5rem; max-width: 620px; text-align: center; }
+  .q-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+  .q-text { font-family: 'Lora', serif; font-size: 1.1rem; line-height: 1.7; color: var(--cream); font-style: italic; }
+  .q-sub { font-size: 13px; color: var(--muted); margin-top: 1rem; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="slides-wrapper" id="sw">
+
+  <!-- SLIDE 0: COVER -->
+  <div class="slide active" id="slide-0">
+    <span class="slide-tag">Bloque II · Personajes Bíblicos · CEIP Santuario Córdoba</span>
+    <h1 class="slide-title">¿Huyes o Confías?</h1>
+    <div class="teal-line"></div>
+    <p style="font-size:1rem;color:var(--muted);text-align:center;max-width:520px;line-height:1.7;margin-bottom:1.25rem;">
+      Cinco personajes del Antiguo Testamento tuvieron que tomar la decisión más importante de su vida. ¿Qué harías tú en su lugar?
+    </p>
+    <div class="cover-grid">
+      <div class="cover-persona"><div class="cover-persona-icon">🐋</div><div class="cover-persona-name">Jonás</div></div>
+      <div class="cover-persona"><div class="cover-persona-icon">🔥</div><div class="cover-persona-name">Moisés</div></div>
+      <div class="cover-persona"><div class="cover-persona-icon">👑</div><div class="cover-persona-name">David</div></div>
+      <div class="cover-persona"><div class="cover-persona-icon">🌾</div><div class="cover-persona-name">Ruth</div></div>
+      <div class="cover-persona"><div class="cover-persona-icon">⭐</div><div class="cover-persona-name">María</div></div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);">Religión, Cultura y Valores · 3.º–4.º Primaria · ABJ</p>
+  </div>
+
+  <!-- SLIDE 1: JONÁS -->
+  <div class="slide" id="slide-1">
+    <span class="slide-tag">Personaje 1 de 5</span>
+    <div class="persona-layout">
+      <div class="persona-card">
+        <div class="persona-icon">🐋</div>
+        <div class="persona-name">Jonás</div>
+        <div class="persona-ref">Jon 1–3 · Biblia CEE</div>
+        <div class="persona-bio">Profeta israelita al que Dios pide ir a Nínive, la ciudad enemiga, para anunciar su mensaje. Jonás tiene miedo y huye en barco hacia Tarsis — en la dirección contraria. Acaba en el vientre de un gran pez durante tres días.</div>
+      </div>
+      <div class="decision-box">
+        <div class="decision-label">¿Qué decisión tomó Jonás?</div>
+        <div class="decision-question">«Dios te pide que vayas a la ciudad de tus enemigos a decirles algo importante. Tienes miedo. ¿Qué haces?»</div>
+        <div class="decision-opts">
+          <button class="opt-btn" onclick="answer(this,false,1)">Voy enseguida, sin pensarlo</button>
+          <button class="opt-btn" onclick="answer(this,true,1)">Huyo en la dirección contraria — es lo que hizo Jonás</button>
+          <button class="opt-btn" onclick="answer(this,false,1)">Le pido a Dios que busque a otra persona</button>
+          <button class="opt-btn" onclick="answer(this,false,1)">Fingo que no he oído nada</button>
+        </div>
+        <div class="feedback fb-ok" id="fb-1-ok">✓ Correcto. Jonás huyó a Tarsis (Jon 1:3). Pero Dios no lo abandonó: le dio una segunda oportunidad desde el vientre del pez. Cuando al fin obedeció, toda la ciudad de Nínive se convirtió. <strong style="color:var(--teal-light);">Decisión: empobreció su vida primero, luego la enriqueció.</strong></div>
+        <div class="feedback fb-no" id="fb-1-no">✗ Piensa bien: Jonás tenía mucho miedo. ¿Cuál es la reacción más humana cuando algo nos da miedo?</div>
+        <div class="cita-block" id="cita-1">«Jonás se levantó para huir a Tarsis, lejos de la presencia del Señor.» — Jon 1:3 (Biblia CEE)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: MOISÉS -->
+  <div class="slide" id="slide-2">
+    <span class="slide-tag">Personaje 2 de 5</span>
+    <div class="persona-layout">
+      <div class="persona-card">
+        <div class="persona-icon">🔥</div>
+        <div class="persona-name">Moisés</div>
+        <div class="persona-ref">Éx 3 · Biblia CEE</div>
+        <div class="persona-bio">Pastor que cuida ovejas en el desierto cuando Dios le habla desde una zarza que arde sin consumirse. Le pide que libere a su pueblo de la esclavitud en Egipto. Moisés se siente completamente incapaz.</div>
+      </div>
+      <div class="decision-box">
+        <div class="decision-label">¿Qué decisión tomó Moisés?</div>
+        <div class="decision-question">«Dios te pide una misión enorme y tú sientes que no vales para nada. ¿Qué hace Moisés?»</div>
+        <div class="decision-opts">
+          <button class="opt-btn" onclick="answer(this,false,2)">Acepta con confianza total desde el principio</button>
+          <button class="opt-btn" onclick="answer(this,true,2)">Pone excusas, pero al final acepta cuando Dios le promete su ayuda</button>
+          <button class="opt-btn" onclick="answer(this,false,2)">Huye como Jonás</button>
+          <button class="opt-btn" onclick="answer(this,false,2)">Le dice a Dios que busque a alguien más importante</button>
+        </div>
+        <div class="feedback fb-ok" id="fb-2-ok">✓ Correcto. Moisés pone excusas: «¿Quién soy yo para ir al Faraón?». Pero Dios le responde: «Yo estaré contigo» (Éx 3:12). Esa promesa lo cambia todo. <strong style="color:var(--teal-light);">Decisión: enriqueció su vida y la de todo un pueblo.</strong></div>
+        <div class="feedback fb-no" id="fb-2-no">✗ Piensa: Moisés era un simple pastor. No era seguro ni elocuente. ¿Qué haría alguien que se siente incapaz pero escucha una promesa?</div>
+        <div class="cita-block" id="cita-2">«Yo estaré contigo.» — Éx 3:12 (Biblia CEE)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: DAVID -->
+  <div class="slide" id="slide-3">
+    <span class="slide-tag">Personaje 3 de 5</span>
+    <div class="persona-layout">
+      <div class="persona-card">
+        <div class="persona-icon">👑</div>
+        <div class="persona-name">David</div>
+        <div class="persona-ref">1 Sam 16 · Biblia CEE</div>
+        <div class="persona-bio">El más pequeño de ocho hermanos, pastor de ovejas. Cuando el profeta Samuel busca al futuro rey de Israel entre los hijos de Jesé, todos esperan que sea elegido el más alto y fuerte. Pero Dios sorprende a todos.</div>
+      </div>
+      <div class="decision-box">
+        <div class="decision-label">¿Qué decisión tomó Dios sobre David?</div>
+        <div class="decision-question">«El profeta Samuel va a elegir al nuevo rey. Delante tiene a siete hermanos altos y fuertes. ¿A quién elige Dios?»</div>
+        <div class="decision-opts">
+          <button class="opt-btn" onclick="answer(this,false,3)">Al hermano mayor, que es el más fuerte</button>
+          <button class="opt-btn" onclick="answer(this,false,3)">Al más inteligente de todos</button>
+          <button class="opt-btn" onclick="answer(this,true,3)">Al más pequeño, David, que ni siquiera estaba en la sala</button>
+          <button class="opt-btn" onclick="answer(this,false,3)">A ninguno — busca a alguien de otra familia</button>
+        </div>
+        <div class="feedback fb-ok" id="fb-3-ok">✓ Correcto. David estaba en el campo cuidando ovejas. Nadie lo había llamado. Pero Dios dijo a Samuel: «El hombre mira las apariencias, pero el Señor mira el corazón» (1 Sam 16:7). <strong style="color:var(--teal-light);">Decisión: enriqueció la historia de todo un pueblo.</strong></div>
+        <div class="feedback fb-no" id="fb-3-no">✗ Recuerda el criterio de Dios: no mira lo que ven los ojos humanos. ¿A quién menos esperarías?</div>
+        <div class="cita-block" id="cita-3">«El hombre mira las apariencias, pero el Señor mira el corazón.» — 1 Sam 16:7 (Biblia CEE)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: RUTH -->
+  <div class="slide" id="slide-4">
+    <span class="slide-tag">Personaje 4 de 5</span>
+    <div class="persona-layout">
+      <div class="persona-card">
+        <div class="persona-icon">🌾</div>
+        <div class="persona-name">Ruth</div>
+        <div class="persona-ref">Rut 1 · Biblia CEE</div>
+        <div class="persona-bio">Joven moabita — de un pueblo extranjero — casada con un israelita que muere. Su suegra Noemí, también viuda, le dice que vuelva a su tierra y a su familia. Ruth no tiene ninguna obligación de quedarse.</div>
+      </div>
+      <div class="decision-box">
+        <div class="decision-label">¿Qué decisión tomó Ruth?</div>
+        <div class="decision-question">«Tu marido ha muerto. Tu suegra te dice que puedes volver a casa de tus padres. Sería lo más cómodo. ¿Qué hace Ruth?»</div>
+        <div class="decision-opts">
+          <button class="opt-btn" onclick="answer(this,false,4)">Vuelve a su tierra — es lo más sensato</button>
+          <button class="opt-btn" onclick="answer(this,true,4)">Se queda con Noemí y no la abandona, aunque no sabe qué pasará</button>
+          <button class="opt-btn" onclick="answer(this,false,4)">Se queda pero se queja todo el tiempo</button>
+          <button class="opt-btn" onclick="answer(this,false,4)">Busca otro marido antes de decidir</button>
+        </div>
+        <div class="feedback fb-ok" id="fb-4-ok">✓ Correcto. Ruth le dijo a Noemí: «A donde tú vayas, iré yo; donde tú mueras, moriré yo» (Rut 1:16). Su fidelidad gratuita, sin esperar nada a cambio, es uno de los más bellos ejemplos de amor en toda la Biblia. <strong style="color:var(--teal-light);">Decisión: enriqueció su vida y la de Noemí.</strong></div>
+        <div class="feedback fb-no" id="fb-4-no">✗ Piensa en lo más generoso que alguien puede hacer sin esperar nada a cambio. ¿Qué haría alguien que ama de verdad?</div>
+        <div class="cita-block" id="cita-4">«A donde tú vayas, iré yo; donde tú mueras, moriré yo.» — Rut 1:16 (Biblia CEE)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: MARÍA -->
+  <div class="slide" id="slide-5">
+    <span class="slide-tag">Personaje 5 de 5</span>
+    <div class="persona-layout">
+      <div class="persona-card">
+        <div class="persona-icon">⭐</div>
+        <div class="persona-name">María</div>
+        <div class="persona-ref">Lc 1:26–38 · Biblia CEE</div>
+        <div class="persona-bio">Joven de Nazaret, comprometida con José. Un ángel le anuncia que será la madre del Hijo de Dios. No lo entiende, tiene miedo, no sabe cómo va a ser posible. Pero escucha con confianza.</div>
+      </div>
+      <div class="decision-box">
+        <div class="decision-label">¿Qué decisión tomó María?</div>
+        <div class="decision-question">«Un ángel te anuncia algo que no entiendes y que cambiará tu vida para siempre. Sin entenderlo del todo, ¿qué responde María?»</div>
+        <div class="decision-opts">
+          <button class="opt-btn" onclick="answer(this,false,5)">«Necesito tiempo para pensarlo»</button>
+          <button class="opt-btn" onclick="answer(this,false,5)">«Primero tengo que consultar con mi familia»</button>
+          <button class="opt-btn" onclick="answer(this,false,5)">«¿Por qué yo y no otra persona más preparada?»</button>
+          <button class="opt-btn" onclick="answer(this,true,5)">«Hágase en mí según tu palabra» — confía sin entenderlo todo</button>
+        </div>
+        <div class="feedback fb-ok" id="fb-5-ok">✓ Correcto. María respondió: «Hágase en mí según tu palabra» (Lc 1:38). Con ese sí libre y confiado, Dios se hizo hombre. Es el mayor ejemplo de discernimiento en toda la Escritura. <strong style="color:var(--teal-light);">Decisión: enriqueció la historia de toda la humanidad.</strong></div>
+        <div class="feedback fb-no" id="fb-5-no">✗ María tenía miedo, como todos. Pero su respuesta fue única. ¿Cuál de las opciones muestra confianza total aunque no se entienda todo?</div>
+        <div class="cita-block" id="cita-5">«Hágase en mí según tu palabra.» — Lc 1:38 (Biblia CEE)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: TABLA RESUMEN -->
+  <div class="slide" id="slide-6">
+    <span class="slide-tag">Resumen del discernimiento</span>
+    <h2 class="slide-title" style="font-size:1.8rem;">¿Enriqueció o empobreció?</h2>
+    <div class="teal-line"></div>
+    <table class="result-table">
+      <thead>
+        <tr>
+          <th>Personaje</th>
+          <th>Decisión</th>
+          <th>Resultado</th>
+          <th>Cita (Biblia CEE)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>🐋 Jonás</td><td>Huyó → luego obedeció</td><td><span class="enriched">Enriqueció (al final)</span></td><td style="color:var(--muted);font-style:italic;">Jon 1:3 / 3:3</td></tr>
+        <tr><td>🔥 Moisés</td><td>Puso excusas → confió</td><td><span class="enriched">Enriqueció a todo su pueblo</span></td><td style="color:var(--muted);font-style:italic;">Éx 3:12</td></tr>
+        <tr><td>👑 David</td><td>Fue elegido siendo el más pequeño</td><td><span class="enriched">Enriqueció la historia de Israel</span></td><td style="color:var(--muted);font-style:italic;">1 Sam 16:7</td></tr>
+        <tr><td>🌾 Ruth</td><td>Eligió quedarse con fidelidad gratuita</td><td><span class="enriched">Enriqueció su vida y la de Noemí</span></td><td style="color:var(--muted);font-style:italic;">Rut 1:16</td></tr>
+        <tr><td>⭐ María</td><td>Dijo sí sin entenderlo todo</td><td><span class="enriched">Enriqueció la historia de la humanidad</span></td><td style="color:var(--muted);font-style:italic;">Lc 1:38</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;color:var(--muted);margin-top:1rem;text-align:center;max-width:620px;line-height:1.6;">Ninguno era perfecto. Ninguno lo tenía todo claro. Lo que les une es que <strong style="color:var(--teal-light);">respondieron a la llamada de Dios con libertad</strong>, y eso cambió su vida y la de los que les rodeaban.</p>
+  </div>
+
+  <!-- SLIDE 7: REFLEXIÓN FINAL -->
+  <div class="slide" id="slide-7">
+    <span class="slide-tag">Para reflexionar</span>
+    <h2 class="slide-title" style="font-size:1.8rem;">¿Y tú?</h2>
+    <div class="teal-line"></div>
+    <div class="q-card">
+      <div class="q-icon">🤔</div>
+      <div class="q-text">«¿A cuál de los cinco personajes te pareces más tú cuando tienes que tomar una decisión difícil?»</div>
+      <div class="q-sub">
+        ¿Eres más de <strong>huir como Jonás</strong>, de <strong>poner excusas como Moisés</strong>, de <strong>ser elegido sin esperarlo como David</strong>, de <strong>ser fiel sin esperar nada a cambio como Ruth</strong>, o de <strong>decir sí con confianza como María</strong>?
+      </div>
+    </div>
+    <div style="margin-top:1.25rem;padding:0.75rem 1.25rem;background:var(--teal-faint);border-left:2px solid var(--teal);border-radius:0 4px 4px 0;max-width:620px;font-size:13px;font-style:italic;color:var(--muted);">
+      Conexión con Córdoba: los santos mártires Acisclo y Victoria, patronos de Córdoba, también tuvieron que discernir en el momento más difícil. ¿Qué les daría fuerzas para no huir?
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:1rem;">
+      <span style="font-size:11px;padding:4px 12px;border:1px solid var(--border);border-radius:20px;color:var(--muted);">🎯 Bloque II completado</span>
+      <span style="font-size:11px;padding:4px 12px;border:1px solid var(--border);border-radius:20px;color:var(--muted);">📚 Temas 5–8</span>
+      <span style="font-size:11px;padding:4px 12px;border:1px solid var(--border);border-radius:20px;color:var(--muted);">🏫 CEIP Santuario · Córdoba</span>
+    </div>
+  </div>
+
+</div><!-- end slides-wrapper -->
+
+<div class="nav-bar">
+  <button class="nav-btn" id="btn-prev" onclick="prev()" disabled>← Anterior</button>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+    <div class="dots" id="dots"></div>
+    <span class="counter" id="counter">1 / 8</span>
+  </div>
+  <button class="nav-btn" id="btn-next" onclick="next()">Siguiente →</button>
+</div>
+
+<script>
+  const total = 8;
+  let cur = 0;
+  let ans = {};
+  const dotsEl = document.getElementById('dots');
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===0?' active':'');
+    d.id = 'dot-'+i;
+    dotsEl.appendChild(d);
+  }
+  function goTo(n) {
+    const p = document.getElementById('slide-'+cur);
+    p.classList.remove('active'); p.classList.add('exit');
+    setTimeout(()=>p.classList.remove('exit'),350);
+    document.getElementById('dot-'+cur).classList.remove('active');
+    if(cur<n) document.getElementById('dot-'+cur).classList.add('done');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    document.getElementById('dot-'+cur).classList.add('active');
+    document.getElementById('counter').textContent=(cur+1)+' / '+total;
+    document.getElementById('btn-prev').disabled=cur===0;
+    document.getElementById('btn-next').disabled=cur===total-1;
+  }
+  function next(){if(cur<total-1)goTo(cur+1);}
+  function prev(){if(cur>0)goTo(cur-1);}
+  function answer(btn,correct,idx){
+    if(ans[idx])return;
+    const box=btn.closest('.decision-opts');
+    box.querySelectorAll('.opt-btn').forEach(b=>{
+      b.disabled=true;
+      if(b===btn)b.classList.add(correct?'correct':'wrong');
+    });
+    if(correct){
+      ans[idx]=true;
+      document.getElementById('fb-'+idx+'-ok').classList.add('show');
+      document.getElementById('cita-'+idx).classList.add('show');
+    } else {
+      document.getElementById('fb-'+idx+'-no').classList.add('show');
+      setTimeout(()=>{
+        box.querySelectorAll('.opt-btn').forEach(b=>{b.disabled=false;b.classList.remove('wrong');});
+        document.getElementById('fb-'+idx+'-no').classList.remove('show');
+      },2000);
+    }
+  }
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')prev();});
+</script>
+</body>
+</html>

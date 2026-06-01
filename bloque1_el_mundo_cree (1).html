@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Mundo Cree — Bloque I · CEIP Santuario Córdoba</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F7F3EC;
+    --ink: #1A1208;
+    --gold: #C49A2A;
+    --gold-light: #F5E8C0;
+    --purple: #4A3B8C;
+    --purple-light: #EDE9F7;
+    --teal: #1D6B5E;
+    --teal-light: #E0F5EE;
+    --coral: #B84A2F;
+    --coral-light: #FAEDE9;
+    --blue: #1A5FAD;
+    --blue-light: #E6F0FB;
+    --sand: #E8DFC8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--ink);
+    color: var(--cream);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* SLIDES */
+  .slides-wrapper {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+  .slide.exit {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  /* NAV */
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: rgba(26,18,8,0.95);
+    border-top: 1px solid rgba(196,154,42,0.3);
+    gap: 1rem;
+  }
+  .nav-btn {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 4px;
+    border: 1px solid rgba(196,154,42,0.5);
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-btn:hover { background: var(--gold); color: var(--ink); }
+  .nav-btn:disabled { opacity: 0.2; cursor: default; }
+  .nav-btn:disabled:hover { background: transparent; color: var(--gold); }
+  .slide-counter {
+    font-size: 12px;
+    color: rgba(247,243,236,0.4);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .progress-dots {
+    display: flex;
+    gap: 6px;
+  }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(196,154,42,0.3);
+    transition: background 0.3s;
+  }
+  .dot.active { background: var(--gold); }
+  .dot.done { background: rgba(196,154,42,0.6); }
+
+  /* SLIDE STYLES */
+  .slide-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    text-align: center;
+    line-height: 1.1;
+    color: var(--cream);
+    margin-bottom: 1rem;
+  }
+  .slide-subtitle {
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    color: rgba(247,243,236,0.6);
+    text-align: center;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+  .gold-line {
+    width: 60px; height: 2px;
+    background: var(--gold);
+    margin: 1rem auto;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  /* COVER SLIDE */
+  .cover-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(196,154,42,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(74,59,140,0.1) 0%, transparent 60%);
+  }
+  .cover-content { position: relative; z-index: 1; text-align: center; max-width: 700px; }
+  .cover-icon { font-size: 4rem; margin-bottom: 1.5rem; }
+  .cover-chips { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; }
+  .chip {
+    font-size: 11px;
+    padding: 4px 12px;
+    border: 1px solid rgba(247,243,236,0.2);
+    border-radius: 20px;
+    color: rgba(247,243,236,0.5);
+  }
+
+  /* INTRO SLIDE */
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    width: 100%;
+    max-width: 800px;
+  }
+  .intro-card {
+    background: rgba(247,243,236,0.05);
+    border: 1px solid rgba(247,243,236,0.1);
+    border-radius: 6px;
+    padding: 1.25rem;
+  }
+  .intro-card-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .intro-card-title { font-size: 13px; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+  .intro-card-text { font-size: 14px; color: rgba(247,243,236,0.7); line-height: 1.6; }
+
+  /* STATION SLIDE */
+  .station-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .station-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    font-weight: 900;
+    opacity: 0.08;
+    position: absolute;
+    top: 1rem;
+    right: 2rem;
+    line-height: 1;
+  }
+  .enigma-box {
+    background: rgba(247,243,236,0.05);
+    border: 1px solid rgba(247,243,236,0.15);
+    border-radius: 6px;
+    padding: 1.5rem;
+    max-width: 720px;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  .enigma-question {
+    font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+    line-height: 1.6;
+    color: var(--cream);
+    margin-bottom: 1rem;
+  }
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .opt-btn {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 4px;
+    border: 1px solid rgba(247,243,236,0.15);
+    background: rgba(247,243,236,0.05);
+    color: var(--cream);
+    cursor: pointer;
+    text-align: left;
+    line-height: 1.4;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .opt-btn:hover:not(:disabled) { background: rgba(247,243,236,0.1); border-color: rgba(247,243,236,0.3); }
+  .opt-btn.correct { background: rgba(29,107,94,0.3); border-color: var(--teal); color: #9FE1CB; }
+  .opt-btn.wrong { background: rgba(184,74,47,0.2); border-color: var(--coral); opacity: 0.5; }
+  .opt-btn:disabled { cursor: default; }
+  .feedback-box {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 4px;
+    border-left: 3px solid;
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 720px;
+    width: 100%;
+    display: none;
+  }
+  .feedback-box.show { display: block; }
+  .feedback-correct { background: rgba(29,107,94,0.15); border-color: var(--teal); }
+  .feedback-wrong { background: rgba(184,74,47,0.1); border-color: var(--coral); }
+  .object-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--gold);
+    border: 1px solid rgba(196,154,42,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    margin-bottom: 1rem;
+  }
+  .letter-reveal {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--gold);
+    margin-top: 0.5rem;
+  }
+
+  /* WORD SLIDE */
+  .word-display {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+  }
+  .letter-box {
+    width: 64px; height: 72px;
+    border: 2px solid rgba(196,154,42,0.3);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--gold);
+    background: rgba(196,154,42,0.05);
+    transition: all 0.5s;
+  }
+  .letter-box.lit {
+    background: rgba(196,154,42,0.15);
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(196,154,42,0.2);
+  }
+  .contrast-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    max-width: 700px;
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+  .contrast-card {
+    border-radius: 6px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .contrast-card-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .contrast-card-text { font-size: 14px; line-height: 1.5; }
+  .cita-block {
+    max-width: 600px;
+    margin: 1.5rem auto 0;
+    padding: 1rem 1.5rem;
+    border-left: 3px solid var(--gold);
+    background: rgba(196,154,42,0.05);
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(247,243,236,0.85);
+    text-align: left;
+  }
+</style>
+</head>
+<body>
+
+<div class="slides-wrapper" id="slides-wrapper">
+
+  <!-- SLIDE 0: COVER -->
+  <div class="slide active" id="slide-0">
+    <div class="cover-bg"></div>
+    <div class="cover-content">
+      <div class="cover-icon">🌍</div>
+      <p class="slide-subtitle">Bloque I · Hecho Religioso · CEIP Santuario Córdoba</p>
+      <h1 class="slide-title">El Mundo Cree</h1>
+      <div class="gold-line"></div>
+      <p style="font-size:1.05rem; color:rgba(247,243,236,0.6); line-height:1.7; max-width:520px; margin:0 auto;">
+        Un recorrido por 5 culturas del mundo para descubrir la pregunta que todas tienen en común — y lo que hace único al cristianismo.
+      </p>
+      <div class="cover-chips">
+        <span class="chip">3.º–4.º Primaria</span>
+        <span class="chip">Aprendizaje Basado en Juegos</span>
+        <span class="chip">5 estaciones</span>
+        <span class="chip">Palabra clave secreta</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 1: INSTRUCCIONES -->
+  <div class="slide" id="slide-1">
+    <p class="slide-subtitle">Cómo funciona</p>
+    <h2 class="slide-title" style="font-size:2rem;">Reglas del escape room</h2>
+    <div class="gold-line"></div>
+    <div class="intro-grid">
+      <div class="intro-card">
+        <div class="intro-card-icon">🗺️</div>
+        <div class="intro-card-title">5 estaciones</div>
+        <div class="intro-card-text">Visitarás Mesopotamia, Egipto, India, Grecia y Palestina. Cada cultura tiene un enigma.</div>
+      </div>
+      <div class="intro-card">
+        <div class="intro-card-icon">🔑</div>
+        <div class="intro-card-title">Elige bien</div>
+        <div class="intro-card-text">En cada estación hay 4 opciones. Solo una es correcta. Piensa antes de responder.</div>
+      </div>
+      <div class="intro-card">
+        <div class="intro-card-icon">🔤</div>
+        <div class="intro-card-title">Colecciona letras</div>
+        <div class="intro-card-text">Cada respuesta correcta te da una letra. Al final formarás la palabra clave secreta.</div>
+      </div>
+      <div class="intro-card">
+        <div class="intro-card-icon">✝️</div>
+        <div class="intro-card-title">El gran descubrimiento</div>
+        <div class="intro-card-text">Al final descubrirás qué tienen en común todas las culturas y qué hace diferente al cristianismo.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: ESTACIÓN 1 — MESOPOTAMIA -->
+  <div class="slide" id="slide-2">
+    <div class="station-num">1</div>
+    <span class="badge" style="background:rgba(196,154,42,0.15);color:var(--gold);">Estación 1 · Enigma visual</span>
+    <h2 class="slide-title" style="font-size:1.8rem;">🏛 Mesopotamia antigua</h2>
+    <div class="object-tag">🕯️ Objeto: una vela encendida</div>
+    <div class="enigma-box">
+      <p class="enigma-question">Los habitantes de Mesopotamia construyeron enormes torres llamadas <strong>zigurats</strong> para acercarse a sus dioses. ¿Qué pregunta intentaban responder con esas torres?</p>
+      <div class="options-grid">
+        <button class="opt-btn" onclick="answer(this, false, 2)">¿Cómo construir edificios muy altos?</button>
+        <button class="opt-btn" onclick="answer(this, true, 2)">¿Hay algo más grande que nosotros que nos cuida?</button>
+        <button class="opt-btn" onclick="answer(this, false, 2)">¿Cómo defendernos de los enemigos?</button>
+        <button class="opt-btn" onclick="answer(this, false, 2)">¿Dónde guardar el grano de la cosecha?</button>
+      </div>
+    </div>
+    <div class="feedback-box feedback-correct" id="fb-2-ok">
+      ✓ <strong>Correcto.</strong> Los zigurats eran templos donde los sacerdotes subían para estar más cerca de los dioses. Como todos los seres humanos, los mesopotámicos preguntaban: ¿hay alguien que nos cuide?
+      <div class="letter-reveal">Letra: C</div>
+    </div>
+    <div class="feedback-box feedback-wrong" id="fb-2-no">
+      ✗ Inténtalo de nuevo. Los zigurats eran lugares sagrados — piensa en por qué construían tan alto.
+    </div>
+  </div>
+
+  <!-- SLIDE 3: ESTACIÓN 2 — EGIPTO -->
+  <div class="slide" id="slide-3">
+    <div class="station-num">2</div>
+    <span class="badge" style="background:rgba(184,74,47,0.15);color:#F5B09A;">Estación 2 · Enigma narrativo</span>
+    <h2 class="slide-title" style="font-size:1.8rem;">🐪 Egipto faraónico</h2>
+    <div class="object-tag">🌱 Objeto: una semilla</div>
+    <div class="enigma-box">
+      <p class="enigma-question">Los egipcios creían que el dios <strong>Osiris murió y resucitó</strong>, y que los muertos podían tener vida eterna. ¿Qué tienen en común esta creencia y el relato cristiano de la Resurrección?</p>
+      <div class="options-grid">
+        <button class="opt-btn" onclick="answer(this, false, 3)">Nada, son completamente distintos</button>
+        <button class="opt-btn" onclick="answer(this, true, 3)">Los dos hablan de que la muerte no tiene la última palabra</button>
+        <button class="opt-btn" onclick="answer(this, false, 3)">Los dos son cuentos para niños</button>
+        <button class="opt-btn" onclick="answer(this, false, 3)">Los dos dicen que la vida termina con la muerte</button>
+      </div>
+    </div>
+    <div class="feedback-box feedback-correct" id="fb-3-ok">
+      ✓ <strong>Correcto.</strong> Todas las culturas han buscado respuesta a la muerte. La diferencia es que Jesús no es un mito: es una persona histórica que resucitó de verdad.
+      <div class="letter-reveal">Letra: R</div>
+    </div>
+    <div class="feedback-box feedback-wrong" id="fb-3-no">
+      ✗ Piensa en lo que tienen en común: la muerte, la vida, la esperanza…
+    </div>
+  </div>
+
+  <!-- SLIDE 4: ESTACIÓN 3 — INDIA -->
+  <div class="slide" id="slide-4">
+    <div class="station-num">3</div>
+    <span class="badge" style="background:rgba(29,107,94,0.2);color:#9FE1CB;">Estación 3 · Enigma de objetos</span>
+    <h2 class="slide-title" style="font-size:1.8rem;">🪷 India védica</h2>
+    <div class="object-tag">🐚 Objeto: una concha</div>
+    <div class="enigma-box">
+      <p class="enigma-question">En la India antigua, el río <strong>Ganges</strong> era sagrado y purificaba el alma. De los cinco objetos del juego (vela, semilla, concha, estrella, pan), ¿cuál usarías para representar la búsqueda de pureza interior?</p>
+      <div class="options-grid">
+        <button class="opt-btn" onclick="answer(this, false, 4)">⭐ La estrella — porque brilla en la oscuridad</button>
+        <button class="opt-btn" onclick="answer(this, true, 4)">🐚 La concha — el agua la moldea y purifica</button>
+        <button class="opt-btn" onclick="answer(this, false, 4)">🍞 El pan — porque alimenta el cuerpo</button>
+        <button class="opt-btn" onclick="answer(this, false, 4)">🕯️ La vela — porque da calor</button>
+      </div>
+    </div>
+    <div class="feedback-box feedback-correct" id="fb-4-ok">
+      ✓ <strong>Correcto.</strong> La concha es moldeada por el agua durante años. El hinduismo usa el agua del Ganges como símbolo de purificación — igual que el bautismo cristiano.
+      <div class="letter-reveal">Letra: E</div>
+    </div>
+    <div class="feedback-box feedback-wrong" id="fb-4-no">
+      ✗ Piensa en qué objeto tiene que ver con el agua y con ser transformado por ella.
+    </div>
+  </div>
+
+  <!-- SLIDE 5: ESTACIÓN 4 — GRECIA -->
+  <div class="slide" id="slide-5">
+    <div class="station-num">4</div>
+    <span class="badge" style="background:rgba(26,95,173,0.2);color:#9FC7F5;">Estación 4 · Enigma visual</span>
+    <h2 class="slide-title" style="font-size:1.8rem;">⚡ Grecia clásica</h2>
+    <div class="object-tag">⭐ Objeto: una estrella</div>
+    <div class="enigma-box">
+      <p class="enigma-question">El filósofo Sócrates dijo: <em>«Solo sé que no sé nada»</em>. Con esto quería decir que buscar la verdad con humildad es más importante que creer que ya la tienes. ¿Qué tiene en común esto con el cristiano ante Dios?</p>
+      <div class="options-grid">
+        <button class="opt-btn" onclick="answer(this, false, 5)">Nada, Sócrates no era cristiano</button>
+        <button class="opt-btn" onclick="answer(this, true, 5)">Los dos buscan la verdad con humildad, sabiendo que hay algo más grande</button>
+        <button class="opt-btn" onclick="answer(this, false, 5)">Los dos dicen que no existe ninguna verdad</button>
+        <button class="opt-btn" onclick="answer(this, false, 5)">Los dos creen que la razón lo puede explicar todo</button>
+      </div>
+    </div>
+    <div class="feedback-box feedback-correct" id="fb-5-ok">
+      ✓ <strong>Correcto.</strong> La diferencia es que el cristiano cree que Dios se ha revelado: no tenemos que buscarlo solos, Él viene a nuestro encuentro.
+      <div class="letter-reveal">Letra: E</div>
+    </div>
+    <div class="feedback-box feedback-wrong" id="fb-5-no">
+      ✗ Piensa en la actitud: humildad, búsqueda, reconocer que hay algo más grande…
+    </div>
+  </div>
+
+  <!-- SLIDE 6: ESTACIÓN 5 — PALESTINA -->
+  <div class="slide" id="slide-6">
+    <div class="station-num">5</div>
+    <span class="badge" style="background:rgba(74,59,140,0.25);color:#CECBF6;">Estación 5 · Enigma bíblico</span>
+    <h2 class="slide-title" style="font-size:1.8rem;">✡ Palestina — Antiguo Testamento</h2>
+    <div class="object-tag">🍞 Objeto: trozo de pan</div>
+    <div class="enigma-box">
+      <p class="enigma-question">Dios le dice a Moisés: <em>«Yo soy el que soy»</em> (Éx 3:14, Biblia CEE). En otras religiones, los dioses tienen nombre de animales o astros. ¿Qué hace diferente al Dios de la Biblia?</p>
+      <div class="options-grid">
+        <button class="opt-btn" onclick="answer(this, false, 6)">Que es más poderoso que los demás dioses</button>
+        <button class="opt-btn" onclick="answer(this, true, 6)">Que no es una fuerza: es una Persona que habla y busca al ser humano</button>
+        <button class="opt-btn" onclick="answer(this, false, 6)">Que vive en el monte Sinaí</button>
+        <button class="opt-btn" onclick="answer(this, false, 6)">Que solo habla con los sacerdotes</button>
+      </div>
+    </div>
+    <div class="feedback-box feedback-correct" id="fb-6-ok">
+      ✓ <strong>Correcto.</strong> El Dios de la Biblia no es una fuerza de la naturaleza: es una Persona que llama por el nombre y sale al encuentro del ser humano. Eso es lo que hace único al cristianismo.
+      <div class="letter-reveal">Letra: R</div>
+    </div>
+    <div class="feedback-box feedback-wrong" id="fb-6-no">
+      ✗ Piensa en la diferencia entre «algo» y «alguien»: ¿qué tipo de Dios aparece en la Biblia?
+    </div>
+  </div>
+
+  <!-- SLIDE 7: PALABRA CLAVE -->
+  <div class="slide" id="slide-7">
+    <p class="slide-subtitle">Palabra clave desvelada</p>
+    <h2 class="slide-title" style="font-size:2rem;">Has completado las 5 estaciones</h2>
+    <div class="word-display">
+      <div class="letter-box lit">C</div>
+      <div class="letter-box lit">R</div>
+      <div class="letter-box lit">E</div>
+      <div class="letter-box lit">E</div>
+      <div class="letter-box lit">R</div>
+    </div>
+    <p style="font-size:1rem;color:rgba(247,243,236,0.6);text-align:center;max-width:560px;line-height:1.7;">
+      Todas las culturas — Mesopotamia, Egipto, India, Grecia y Palestina — comparten la misma palabra: <strong style="color:var(--gold);">CREER</strong>. El ser humano es un ser religioso por naturaleza.
+    </p>
+    <div class="contrast-grid">
+      <div class="contrast-card" style="background:rgba(247,243,236,0.05);border:1px solid rgba(247,243,236,0.1);">
+        <div class="contrast-card-label" style="color:rgba(247,243,236,0.4);">Religiones del ascenso</div>
+        <div class="contrast-card-text" style="color:rgba(247,243,236,0.7);">El ser humano sube hacia Dios a través de ritos y esfuerzos</div>
+      </div>
+      <div class="contrast-card" style="background:rgba(196,154,42,0.1);border:1px solid rgba(196,154,42,0.3);">
+        <div class="contrast-card-label" style="color:var(--gold);">Religión de la Encarnación</div>
+        <div class="contrast-card-text" style="color:var(--cream);">Dios baja hacia el ser humano — Él toma la iniciativa</div>
+      </div>
+    </div>
+    <div class="cita-block">
+      «Tanto amó Dios al mundo que le dio a su Hijo único, para que todo el que crea en él no perezca, sino que tenga vida eterna.»<br>
+      <span style="font-size:12px;color:rgba(247,243,236,0.4);font-style:normal;">— Juan 3:16 · Biblia CEE</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: REFLEXIÓN FINAL -->
+  <div class="slide" id="slide-8">
+    <p class="slide-subtitle">Para pensar en casa</p>
+    <h2 class="slide-title" style="font-size:2rem;">La Mezquita-Catedral de Córdoba</h2>
+    <div class="gold-line"></div>
+    <p style="font-size:1.05rem;color:rgba(247,243,236,0.7);text-align:center;max-width:620px;line-height:1.8;margin-bottom:1.5rem;">
+      La Mezquita-Catedral de Córdoba es uno de los ejemplos más extraordinarios del mundo de cómo distintas tradiciones religiosas han buscado a Dios en el mismo espacio a lo largo de los siglos.
+    </p>
+    <div class="enigma-box" style="max-width:620px;text-align:center;">
+      <p style="font-size:1.1rem;font-weight:600;color:var(--gold);margin-bottom:0.5rem;">Pregunta para casa</p>
+      <p style="font-size:1rem;color:var(--cream);line-height:1.7;">¿Por qué crees que los seres humanos siempre han construido edificios especiales para hablar con Dios? ¿Lo has sentido tú alguna vez en algún lugar?</p>
+    </div>
+    <div class="cover-chips" style="margin-top:1.5rem;">
+      <span class="chip">🎯 Objetivo completado</span>
+      <span class="chip">📚 Bloque I — Temas 1–4</span>
+      <span class="chip">🏫 CEIP Santuario · Córdoba</span>
+    </div>
+  </div>
+
+</div><!-- end slides-wrapper -->
+
+<!-- NAV BAR -->
+<div class="nav-bar">
+  <button class="nav-btn" id="btn-prev" onclick="prevSlide()" disabled>← Anterior</button>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+    <div class="progress-dots" id="dots"></div>
+    <span class="slide-counter" id="counter">1 / 9</span>
+  </div>
+  <button class="nav-btn" id="btn-next" onclick="nextSlide()">Siguiente →</button>
+</div>
+
+<script>
+  const totalSlides = 9;
+  let current = 0;
+  let answered = {};
+
+  const dotsEl = document.getElementById('dots');
+  for (let i = 0; i < totalSlides; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.id = 'dot-' + i;
+    dotsEl.appendChild(d);
+  }
+
+  function goTo(n) {
+    const prev = document.getElementById('slide-' + current);
+    prev.classList.remove('active');
+    prev.classList.add('exit');
+    setTimeout(() => prev.classList.remove('exit'), 400);
+    document.getElementById('dot-' + current).classList.remove('active');
+    if (current < n) document.getElementById('dot-' + current).classList.add('done');
+
+    current = n;
+    const next = document.getElementById('slide-' + current);
+    next.classList.add('active');
+    document.getElementById('dot-' + current).classList.add('active');
+    document.getElementById('counter').textContent = (current + 1) + ' / ' + totalSlides;
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === totalSlides - 1;
+  }
+
+  function nextSlide() { if (current < totalSlides - 1) goTo(current + 1); }
+  function prevSlide() { if (current > 0) goTo(current - 1); }
+
+  function answer(btn, correct, slideIdx) {
+    if (answered[slideIdx]) return;
+    answered[slideIdx] = true;
+    const parent = btn.closest('.enigma-box');
+    parent.querySelectorAll('.opt-btn').forEach(b => {
+      b.disabled = true;
+      if (b === btn) b.classList.add(correct ? 'correct' : 'wrong');
+    });
+    if (correct) {
+      document.getElementById('fb-' + slideIdx + '-ok').classList.add('show');
+    } else {
+      document.getElementById('fb-' + slideIdx + '-no').classList.add('show');
+      setTimeout(() => {
+        answered[slideIdx] = false;
+        parent.querySelectorAll('.opt-btn').forEach(b => {
+          b.disabled = false;
+          b.classList.remove('wrong');
+        });
+        document.getElementById('fb-' + slideIdx + '-no').classList.remove('show');
+      }, 2000);
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') nextSlide();
+    if (e.key === 'ArrowLeft') prevSlide();
+  });
+</script>
+</body>
+</html>
